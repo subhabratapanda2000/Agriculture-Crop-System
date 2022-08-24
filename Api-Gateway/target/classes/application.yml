@@ -1,0 +1,22 @@
+server:
+  port: 8050
+  
+spring:
+  application:
+    name: cloud-api-gateway
+  cloud:
+    gateway:
+      routes:
+      - id: Crop-Management
+        uri: lb://Crop-Management
+        predicates:
+        - Path=/crop/**
+      - id: Farmer-Management
+        uri: lb://Farmer-Management
+        predicates:
+        - Path=/farmer/**
+      
+        
+        
+            
+ 
