@@ -19,9 +19,17 @@ public class FarmerDetails {
 	@Field
 	private String name;
 	@Field
-	private String address;
+	private String userName;
+	@Field
+	private String password;
 	@Field
 	private String mobileNo;
+	@Field
+	private String address;
+	@Field
+	private boolean active;
+	@Field
+	private String role;
 
 
 }

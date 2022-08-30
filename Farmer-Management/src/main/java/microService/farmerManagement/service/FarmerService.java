@@ -25,9 +25,13 @@ public class FarmerService {
 		
 	}
 	
+	public int count() {
+		return ((int)repo.count());
+	}
+	
 
 	public List<FarmerDetails> findAll(){
-		List<FarmerDetails> list=repo.findAll();
+		List<FarmerDetails> list=repo.findAllFarmer("ROLE_FARMER");
 		System.out.println(list);
 		return list;
 	}
@@ -37,6 +41,19 @@ public class FarmerService {
 		repo.deleteById(id);
 	}
 	
+	public List<FarmerDetails> findActiveFarmer(boolean b){
+		return repo.findActiveFarmer(b);
+	}
+	
+	public Optional<FarmerDetails> findByUserName(String userName) {
+		return repo.findByUserName(userName);
+	}
+	public Optional<FarmerDetails> findByMobile(String mobile) {
+		return repo.findByMobile(mobile);
+	}
+	public Optional<FarmerDetails> findByName(String name) {
+		return repo.findByName(name);
+	}
 	
 
 }

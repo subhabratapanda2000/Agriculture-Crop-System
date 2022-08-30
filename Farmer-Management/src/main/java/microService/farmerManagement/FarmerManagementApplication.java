@@ -7,6 +7,8 @@ import org.springframework.cloud.client.loadbalancer.LoadBalanced;
 import org.springframework.cloud.netflix.eureka.EnableEurekaClient;
 import org.springframework.cloud.netflix.hystrix.EnableHystrix;
 import org.springframework.context.annotation.Bean;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.servlet.config.annotation.EnableWebMvc;
 
@@ -28,6 +30,12 @@ public class FarmerManagementApplication {
 //		return new RestTemplate(clientHttpRequestFactory);
 		return new RestTemplate();
 	}
+	
+	@Bean
+    public PasswordEncoder getPasswordBEncoder() {
+        return new BCryptPasswordEncoder(10);
+//		return NoOpPasswordEncoder.getInstance();
+    }
 
 	public static void main(String[] args) {
 		SpringApplication.run(FarmerManagementApplication.class, args);
