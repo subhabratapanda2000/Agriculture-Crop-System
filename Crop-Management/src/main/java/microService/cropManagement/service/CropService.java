@@ -1,6 +1,5 @@
 package microService.cropManagement.service;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
@@ -23,8 +22,8 @@ public class CropService {
 	public CropDetails findById(int id) {
 		Optional<CropDetails> op = repo.findById(id);
 		if(op.isPresent()) {
-			CropDetails crop=op.get();
-			return crop;
+			
+			return op.get();
 		}
 		else {
 			return null;
@@ -42,6 +41,10 @@ public class CropService {
 	
 	public void deleteById(int id) {
 		repo.deleteById(id);
+	}
+	
+	public long count() {
+		return repo.count();
 	}
 	
 	public List<CropDetails> findByName(String name){

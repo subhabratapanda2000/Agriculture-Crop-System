@@ -17,6 +17,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
 
 import microService.cropManagement.models.CropDetails;
@@ -35,9 +36,24 @@ public class CropController {
 	@Autowired
 	MongoTemplate mongoTemplate;
 	
-	@PostMapping("/create")
-	public ResponseEntity<String> insertCrops(@RequestBody CropDetails crop) {
+	//@RequestMapping(value="/create/{fid}", method=RequestMethod.POST)
+	@PostMapping("/create/{fid}")
+	public ResponseEntity<String> insertCrops(@RequestBody CropDetails crop, @PathVariable("fid") int fid) {
 		try {
+			//Auto Id generate
+			int id=((int)repo.count())+10;
+			boolean flag=true;
+			while(flag) {
+				Optional<CropDetails> op = repo1.findById(id);
+				if(op.isPresent()) {
+					id++;
+				}
+				else {
+					flag=false;
+				}	
+			}
+			crop.setId(id);
+			crop.setFarmerId(fid);
 			repo.save(crop);
 		System.out.println("Save...");
 		System.out.println(crop);
@@ -45,6 +61,11 @@ public class CropController {
 		}catch(Exception e) {
 			return new ResponseEntity<String>("There have some problem", HttpStatus.INTERNAL_SERVER_ERROR);
 		}
+	}
+	
+	@GetMapping("/count")
+	public long count() {
+		return repo.count();
 	}
 	
 	@GetMapping("/getcrop/{id}")
@@ -114,7 +135,7 @@ public class CropController {
 			return new ResponseEntity<Object>("NOT FOUND", HttpStatus.NOT_FOUND);
 		}
 		}catch(Exception e) {
-			return new ResponseEntity<Object>(null, HttpStatus.INTERNAL_SERVER_ERROR);
+			return new ResponseEntity<Object>(e, HttpStatus.INTERNAL_SERVER_ERROR);
 		}
 	}
 	

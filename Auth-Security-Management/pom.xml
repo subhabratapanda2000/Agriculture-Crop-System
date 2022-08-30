@@ -8,11 +8,11 @@
 		<version>2.7.3</version>
 		<relativePath/> <!-- lookup parent from repository -->
 	</parent>
-	<groupId>cropSystem.microService1</groupId>
-	<artifactId>Crop-Management</artifactId>
+	<groupId>cropSystem.Auth-Security-Management</groupId>
+	<artifactId>Auth-Security-Management</artifactId>
 	<version>0.0.1-SNAPSHOT</version>
-	<name>Crop-Management</name>
-	<description>Crop Management Service for Agriculture Crop System</description>
+	<name>Auth-Security-Management</name>
+	<description>Auth Security Management  for Agriculture Crop System</description>
 	<properties>
 		<java.version>1.8</java.version>
 		<spring-cloud.version>2021.0.3</spring-cloud.version>
@@ -20,11 +20,15 @@
 	<dependencies>
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
-			<artifactId>spring-boot-starter-data-mongodb</artifactId>
+			<artifactId>spring-boot-starter-security</artifactId>
 		</dependency>
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter-web</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.springframework.cloud</groupId>
+			<artifactId>spring-cloud-starter-netflix-eureka-client</artifactId>
 		</dependency>
 
 		<dependency>
@@ -44,38 +48,28 @@
 			<scope>test</scope>
 		</dependency>
 		<dependency>
-			<groupId>org.springframework.cloud</groupId>
-			<artifactId>spring-cloud-starter-netflix-eureka-client</artifactId>
+			<groupId>org.springframework.security</groupId>
+			<artifactId>spring-security-test</artifactId>
+			<scope>test</scope>
 		</dependency>
-		
-		
-		
-		
-		<!-- https://mvnrepository.com/artifact/io.springfox/springfox-swagger2 -->
-		<dependency>
-    		<groupId>io.springfox</groupId>
-    		<artifactId>springfox-swagger2</artifactId>
-    		<version>3.0.0</version>
-		</dependency>
-		<!-- https://mvnrepository.com/artifact/io.springfox/springfox-swagger-ui -->
-		<dependency>
-    		<groupId>io.springfox</groupId>
-    		<artifactId>springfox-swagger-ui</artifactId>
-    		<version>3.0.0</version>
-		</dependency>
-		
-		<dependency>
-    		<groupId>io.springfox</groupId>
-    		<artifactId>springfox-boot-starter</artifactId>
-    		<version>3.0.0</version>
-		</dependency>
-		
-		
-		
-		
-		
+		<!-- https://mvnrepository.com/artifact/org.springframework.security.oauth.boot/spring-security-oauth2-autoconfigure -->
+<dependency>
+    <groupId>org.springframework.security.oauth.boot</groupId>
+    <artifactId>spring-security-oauth2-autoconfigure</artifactId>
+</dependency>
 		
 	</dependencies>
+	<dependencyManagement>
+		<dependencies>
+			<dependency>
+				<groupId>org.springframework.cloud</groupId>
+				<artifactId>spring-cloud-dependencies</artifactId>
+				<version>${spring-cloud.version}</version>
+				<type>pom</type>
+				<scope>import</scope>
+			</dependency>
+		</dependencies>
+	</dependencyManagement>
 
 	<build>
 		<plugins>
@@ -91,19 +85,7 @@
 					</excludes>
 				</configuration>
 			</plugin>
-			
 		</plugins>
 	</build>
 
-	<dependencyManagement>
-		<dependencies>
-			<dependency>
-				<groupId>org.springframework.cloud</groupId>
-				<artifactId>spring-cloud-dependencies</artifactId>
-				<version>${spring-cloud.version}</version>
-				<type>pom</type>
-				<scope>import</scope>
-			</dependency>
-		</dependencies>
-	</dependencyManagement>
 </project>

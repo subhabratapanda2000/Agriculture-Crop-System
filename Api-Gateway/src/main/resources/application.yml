@@ -15,6 +15,10 @@ spring:
         uri: lb://Farmer-Management
         predicates:
         - Path=/farmer/**
+      - id: Dealer-Management
+        uri: lb://Dealer-Management
+        predicates:
+        - Path=/dealer/**
       
         
         

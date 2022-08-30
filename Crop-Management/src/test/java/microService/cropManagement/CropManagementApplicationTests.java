@@ -9,22 +9,21 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import org.junit.jupiter.api.MethodOrderer.OrderAnnotation;
+
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestMethodOrder;
-import org.junit.runner.RunWith;
+//import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.test.context.junit4.SpringRunner;
-
-import com.google.common.base.Optional;
 
 import microService.cropManagement.models.CropDetails;
 import microService.cropManagement.repo.CropRepository;
 import microService.cropManagement.service.CropService;
 
 @SpringBootTest
-@RunWith(SpringRunner.class)
+//@RunWith(SpringRunner.class)
 @TestMethodOrder(OrderAnnotation.class)
 class CropManagementApplicationTests {
 
@@ -36,14 +35,14 @@ class CropManagementApplicationTests {
 	
 	
 	@Test
-	public void testReadAll() {
+	void testReadAll() {
 		when(repo.findAll()).thenReturn(Stream
 				.of(new CropDetails(201, "abcd", 20.00, 30.00, 8), new CropDetails(202, "efgh", 23.00, 33.00, 8)).collect(Collectors.toList()));
 		assertEquals(2, service.findAll().size());
 	}
 	
 	@Test
-	public void getUserbyIdTest() {
+	void getUserbyIdTest() {
 		int id=201;
 		CropDetails cd1=new CropDetails(201, "abcd", 20.00, 30.00, 8);
 		System.out.println("Hello sam");
@@ -53,21 +52,21 @@ class CropManagementApplicationTests {
 	}
 	
 	@Test
-	public void saveCropTest() {
+	void saveCropTest() {
 		CropDetails cp=new CropDetails(201, "abcd", 20.00, 30.00, 8);
 		when(repo.save(cp)).thenReturn(cp);
 		assertEquals(cp, service.save(cp));
 	}
 	
 	@Test
-	public void deleteCrop() {
+	 void deleteCrop() {
 		CropDetails cp=new CropDetails(201, "abcd", 20.00, 30.00, 8);
 		service.deleteById(201);
 		verify(repo).deleteById(any());
 	}
 	
 	@Test
-	public void getCropByFarmerId() {
+	void getCropByFarmerId() {
 		CropDetails cp=new CropDetails(201, "abcd", 20.00, 30.00, 8);
 		when(repo.findByName("abcd")).thenReturn(Stream
 				.of(new CropDetails(201, "abcd", 20.00, 30.00, 8), new CropDetails(202, "abcd", 23.00, 33.00, 8)).collect(Collectors.toList()));
