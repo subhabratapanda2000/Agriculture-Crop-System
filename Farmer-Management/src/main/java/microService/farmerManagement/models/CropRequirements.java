@@ -8,18 +8,11 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @NoArgsConstructor
 
-
-public class CropDetails {
-
-	private int id;
-	
-	private String cropName;
-	
-	private double quantity;
-	
-	private double price;
-	
-	private int farmerId;
-	private String date;
+public class CropRequirements {
+	private String id;
+    private String cropName;
+    private double quantity;
+    private double price;
+    private String message;
 
 }

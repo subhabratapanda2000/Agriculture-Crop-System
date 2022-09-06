@@ -7,19 +7,10 @@ import lombok.NoArgsConstructor;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-
-
-public class CropDetails {
-
-	private int id;
-	
-	private String cropName;
-	
-	private double quantity;
-	
-	private double price;
-	
-	private int farmerId;
+public class SendOfferDetails {
 	private String date;
+	private String time;
+	private CropRequirements cropRequirements;
+	private DealerBasicInfo dealerInfo;
 
 }

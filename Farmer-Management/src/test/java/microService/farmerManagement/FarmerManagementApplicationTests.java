@@ -28,16 +28,16 @@ class FarmerManagementApplicationTests {
 	
 	
 	@Test
-	public void testReadAll() {
-		when(repo.findAll()).thenReturn(Stream
-				.of(new FarmerDetails(201, "abcd","","", "kalyani", "99868758", true,""), new FarmerDetails(202, "gdfgfg","","", "kolkata", "99868758", true,"")).collect(Collectors.toList()));
-		assertEquals(2, service.findAll().size());
+	public void testFindAll() {
+		when(repo.findAllFarmer("ROLE_FARMER")).thenReturn(Stream
+				.of(new FarmerDetails(201, "abcd","us","pw", "kalyani", "99868758", true,"ROLE_FARMER", "12/11/20", true)).collect(Collectors.toList()));
+		assertEquals(1, service.findAll().size());
 	}
 	
 	@Test
 	public void getUserbyIdTest() {
 		int id=201;
-		FarmerDetails fm=new FarmerDetails(201, "abcd","","", "kalyani", "99868758", true,"");
+		FarmerDetails fm=new FarmerDetails(201, "abcd","","", "kalyani", "99868758", true,"", "", true);
 		System.out.println("Hello sam");
 		when(repo.findById(id)).thenReturn(java.util.Optional.of(fm));
 		System.out.println(service.findById(id)+"and"+fm);
@@ -45,15 +45,15 @@ class FarmerManagementApplicationTests {
 	}
 	
 	@Test
-	public void saveCropTest() {
-		FarmerDetails fm=new FarmerDetails(201, "abcd","","", "kalyani", "99868758", true, "");
+	public void saveFarmerTest() {
+		FarmerDetails fm=new FarmerDetails(201, "abcd","","", "kalyani", "99868758", true, "", "", true);
 		when(repo.save(fm)).thenReturn(fm);
 		assertEquals(fm, service.save(fm));
 	}
 	
 	@Test
-	public void deleteCrop() {
-		FarmerDetails fm=new FarmerDetails(201, "abcd","","", "kalyani", "99868758", true, "");
+	public void deleteFarmer() {
+		FarmerDetails fm=new FarmerDetails(201, "abcd","","", "kalyani", "99868758", true, "", "", true);
 		service.deleteById(201);
 		verify(repo).deleteById(any());
 	}

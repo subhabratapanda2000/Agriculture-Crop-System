@@ -42,7 +42,11 @@ public class FarmerService {
 	}
 	
 	public List<FarmerDetails> findActiveFarmer(boolean b){
-		return repo.findActiveFarmer(b);
+		return repo.findActiveFarmer(b, "ROLE_FARMER");
+	}
+	
+	public List<FarmerDetails> findAllPrimeFarmers(){
+		return repo.findAllPrimeMember(true, "ROLE_FARMER");
 	}
 	
 	public Optional<FarmerDetails> findByUserName(String userName) {
@@ -54,6 +58,7 @@ public class FarmerService {
 	public Optional<FarmerDetails> findByName(String name) {
 		return repo.findByName(name);
 	}
+	
 	
 
 }

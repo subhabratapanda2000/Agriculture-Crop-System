@@ -6,16 +6,20 @@ import java.util.Optional;
 import org.springframework.data.mongodb.repository.MongoRepository;
 import org.springframework.data.mongodb.repository.Query;
 import org.springframework.stereotype.Repository;
+
 import microService.farmerManagement.models.FarmerDetails;
 
 
 	@Repository
 	public interface FarmerRepository extends MongoRepository<FarmerDetails, Integer> {
-		@Query("{'active':?0}")
-		List<FarmerDetails> findActiveFarmer(boolean b);
+		@Query("{'active':?0, 'role':?1}")
+		List<FarmerDetails> findActiveFarmer(boolean b, String role);
 		
 		@Query("{'role':?0}")
 		List<FarmerDetails> findAllFarmer(String role);
+		
+		@Query("{'primeMember':?0, 'role':?1}")
+		List<FarmerDetails> findAllPrimeMember(boolean p, String role);
 		
 		@Query("{'userName':?0}")
 		Optional<FarmerDetails> findByUserName(String userName);

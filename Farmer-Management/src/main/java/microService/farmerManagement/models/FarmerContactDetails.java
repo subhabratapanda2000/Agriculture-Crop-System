@@ -7,19 +7,10 @@ import lombok.NoArgsConstructor;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-
-
-public class CropDetails {
-
-	private int id;
+public class FarmerContactDetails {
+	private String farmerName;
+	private String mobileNo;
+	private String address;
 	
-	private String cropName;
-	
-	private double quantity;
-	
-	private double price;
-	
-	private int farmerId;
-	private String date;
 
 }
