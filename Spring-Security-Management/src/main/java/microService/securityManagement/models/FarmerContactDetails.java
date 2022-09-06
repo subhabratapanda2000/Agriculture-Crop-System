@@ -1,7 +1,5 @@
 package microService.securityManagement.models;
 
-
-
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -9,20 +7,10 @@ import lombok.NoArgsConstructor;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-
-
-public class CropDetails {
+public class FarmerContactDetails {
+	private String farmerName;
+	private String mobileNo;
+	private String address;
 	
-	private int id;
-	
-	private String cropName;
-	
-	private double quantity;
-	
-	private double price;
-	
-	private int farmerId;
-	private String date;
-
 
 }

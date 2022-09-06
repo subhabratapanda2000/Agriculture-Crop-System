@@ -41,11 +41,14 @@ public class SecurityConfiguration extends WebSecurityConfigurerAdapter {
         .and()
         .authorizeRequests()
 //        		 .anyRequest().fullyAuthenticated()
-        .antMatchers("/security/farmer/**").hasAnyRole("ADMIN", "FARMER")
-        .antMatchers("/security/dealer/**").hasAnyRole("ADMIN", "DEALER")
+        .antMatchers("/security/anyRole/**").hasAnyRole("ADMIN","FARMER", "DEALER")
+        .antMatchers("/security/findByIdOfDealer/{did}").hasAnyRole("ADMIN", "DEALER")
+        .antMatchers("/security/findByIdOfFarmer/{fid}").hasAnyRole("ADMIN","FARMER")
         .antMatchers("/security/createFarmer").permitAll()
         .antMatchers("/security/createDealer").permitAll()
-        		.antMatchers("/security/**").hasRole("ADMIN")
+        .antMatchers("/security/farmer/**").hasRole("FARMER")
+        .antMatchers("/security/dealer/**").hasRole("DEALER")
+        .antMatchers("/security/admin/**").hasRole("ADMIN")
                 .and().formLogin();
                 
         

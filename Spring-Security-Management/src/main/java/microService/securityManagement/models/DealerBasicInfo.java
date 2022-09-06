@@ -1,7 +1,5 @@
 package microService.securityManagement.models;
 
-
-
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -10,28 +8,9 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @NoArgsConstructor
 
-
-public class UserData {
-	
-	private int id;
-
+public class DealerBasicInfo {
 	private String name;
-	
-	private String userName;
-	
-	private String password;
-
 	private String mobileNo;
-
 	private String address;
-	
-	private boolean active;
-	private String role;
-	
-	private String joinDate;
-	
-	private boolean primeMember;
-
-
 
 }

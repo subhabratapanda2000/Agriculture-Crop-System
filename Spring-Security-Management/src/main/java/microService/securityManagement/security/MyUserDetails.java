@@ -18,11 +18,11 @@ public class MyUserDetails implements UserDetails {
     private boolean active;
     private String authorities;
 
-    public MyUserDetails(UserData farmer) {
-        this.userName = farmer.getUserName();
-        this.password = farmer.getPassword();
-        this.active = farmer.isActive();
-        this.authorities = farmer.getRole();
+    public MyUserDetails(UserData user) {
+        this.userName = user.getUserName();
+        this.password = user.getPassword();
+        this.active = user.isActive();
+        this.authorities = user.getRole();
         
     }
 
@@ -43,7 +43,7 @@ public class MyUserDetails implements UserDetails {
 
     @Override
     public boolean isAccountNonExpired() {
-        return true;
+        return active;
     }
 
     @Override
@@ -58,6 +58,6 @@ public class MyUserDetails implements UserDetails {
 
     @Override
     public boolean isEnabled() {
-        return true;
+        return active;
     }
 }
