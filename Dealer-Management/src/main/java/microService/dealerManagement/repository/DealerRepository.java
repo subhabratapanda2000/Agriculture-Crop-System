@@ -12,8 +12,8 @@ import microService.dealerManagement.models.DealerDetails;
 
 @Repository
 public interface DealerRepository extends MongoRepository<DealerDetails, Integer> {
-	@Query("{'active':?0}")
-	List<DealerDetails> findActiveDealer(boolean b);
+	@Query("{'active':?0, 'role':?1}")
+	List<DealerDetails> findActiveDealer(boolean b, String role);
 	
 	@Query("{'role':?0}")
 	List<DealerDetails> findAllDealer(String role);
@@ -26,5 +26,9 @@ public interface DealerRepository extends MongoRepository<DealerDetails, Integer
 	
 	@Query("{'name':?0}")
 	Optional<DealerDetails> findByName(String name);
+	
+	@Query("{'primeMember':?0, 'role':?1}")
+	List<DealerDetails> findAllPrimeMember(boolean p, String role);
+	
 
 }

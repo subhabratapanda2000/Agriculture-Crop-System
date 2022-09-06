@@ -30,6 +30,10 @@ public class DealerDetails {
 	private boolean active;
 	@Field
 	private String role;
+	@Field
+	private String joinDate;
+	@Field
+	private boolean primeMember;
 
 
 }

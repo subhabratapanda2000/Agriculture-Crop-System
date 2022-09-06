@@ -42,7 +42,11 @@ public class DealerService {
 	}
 	
 	public List<DealerDetails> findActiveDealer(boolean b){
-		return repo.findActiveDealer(b);
+		return repo.findActiveDealer(b, "ROLE_DEALER");
+	}
+	
+	public List<DealerDetails> findAllPrimeDealers(){
+		return repo.findAllPrimeMember(true, "ROLE_DEALER");
 	}
 	
 	public Optional<DealerDetails> findByUserName(String userName) {
