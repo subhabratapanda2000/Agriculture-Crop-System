@@ -25,6 +25,10 @@ public class DealerDetails {
 	private boolean active;
 
 	private String role;
+	private String joinDate;
+	
+	private boolean primeMember;
+
 
 
 }

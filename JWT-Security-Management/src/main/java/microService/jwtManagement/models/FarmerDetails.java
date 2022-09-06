@@ -1,7 +1,5 @@
 package microService.jwtManagement.models;
 
-
-
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -11,7 +9,7 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 
 
-public class FarmerDetails {
+public class FarmerDetails{
 	
 	private int fid;
 
@@ -26,6 +24,11 @@ public class FarmerDetails {
 	private String address;
 	
 	private boolean active;
+	private String role;
+	
+	private String joinDate;
+	
+	private boolean primeMember;
 
 
 }
