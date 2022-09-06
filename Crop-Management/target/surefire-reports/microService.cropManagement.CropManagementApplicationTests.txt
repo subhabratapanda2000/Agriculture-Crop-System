@@ -1,0 +1,4 @@
+-------------------------------------------------------------------------------
+Test set: microService.cropManagement.CropManagementApplicationTests
+-------------------------------------------------------------------------------
+Tests run: 5, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 28.803 s - in microService.cropManagement.CropManagementApplicationTests

@@ -1,0 +1,5 @@
+microService\cropManagement\controller\CropController.class
+microService\cropManagement\service\CropService.class
+microService\cropManagement\models\CropDetails.class
+microService\cropManagement\CropManagementApplication.class
+microService\cropManagement\repo\CropRepository.class
