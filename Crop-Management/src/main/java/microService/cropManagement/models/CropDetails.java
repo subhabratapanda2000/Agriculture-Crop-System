@@ -24,5 +24,7 @@ public class CropDetails {
 	private double price;
 	@Field
 	private int farmerId;
+	@Field
+	private String date;
 
 }

@@ -37,14 +37,14 @@ class CropManagementApplicationTests {
 	@Test
 	void testReadAll() {
 		when(repo.findAll()).thenReturn(Stream
-				.of(new CropDetails(201, "abcd", 20.00, 30.00, 8), new CropDetails(202, "efgh", 23.00, 33.00, 8)).collect(Collectors.toList()));
+				.of(new CropDetails(201, "abcd", 20.00, 30.00, 8, ""), new CropDetails(202, "efgh", 23.00, 33.00, 8, "")).collect(Collectors.toList()));
 		assertEquals(2, service.findAll().size());
 	}
 	
 	@Test
 	void getUserbyIdTest() {
 		int id=201;
-		CropDetails cd1=new CropDetails(201, "abcd", 20.00, 30.00, 8);
+		CropDetails cd1=new CropDetails(201, "abcd", 20.00, 30.00, 8, "");
 		System.out.println("Hello sam");
 		when(repo.findById(id)).thenReturn(java.util.Optional.of(cd1));
 		System.out.println(service.findById(id)+"and"+cd1);
@@ -53,23 +53,23 @@ class CropManagementApplicationTests {
 	
 	@Test
 	void saveCropTest() {
-		CropDetails cp=new CropDetails(201, "abcd", 20.00, 30.00, 8);
+		CropDetails cp=new CropDetails(201, "abcd", 20.00, 30.00, 8, "");
 		when(repo.save(cp)).thenReturn(cp);
 		assertEquals(cp, service.save(cp));
 	}
 	
 	@Test
 	 void deleteCrop() {
-		CropDetails cp=new CropDetails(201, "abcd", 20.00, 30.00, 8);
+		CropDetails cp=new CropDetails(201, "abcd", 20.00, 30.00, 8, "");
 		service.deleteById(201);
 		verify(repo).deleteById(any());
 	}
 	
 	@Test
 	void getCropByFarmerId() {
-		CropDetails cp=new CropDetails(201, "abcd", 20.00, 30.00, 8);
+		CropDetails cp=new CropDetails(201, "abcd", 20.00, 30.00, 8, "");
 		when(repo.findByName("abcd")).thenReturn(Stream
-				.of(new CropDetails(201, "abcd", 20.00, 30.00, 8), new CropDetails(202, "abcd", 23.00, 33.00, 8)).collect(Collectors.toList()));
+				.of(new CropDetails(201, "abcd", 20.00, 30.00, 8, ""), new CropDetails(202, "abcd", 23.00, 33.00, 8, "")).collect(Collectors.toList()));
 		assertEquals(2, service.findByName("abcd").size());
 	}
 	

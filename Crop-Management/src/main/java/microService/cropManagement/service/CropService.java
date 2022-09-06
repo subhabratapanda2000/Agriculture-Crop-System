@@ -33,8 +33,8 @@ public class CropService {
 	
 
 	public List<CropDetails> findAll(){
-		List<CropDetails> list=repo.findAll();
-		System.out.println(list);
+		List<CropDetails> list=repo.findByQunatity(0);
+		//System.out.println(list);
 		return list;
 	}
 	
@@ -47,15 +47,35 @@ public class CropService {
 		return repo.count();
 	}
 	
-	public List<CropDetails> findByName(String name){
+	public List<CropDetails> findByName(String cropName){
 	
-	   return repo.findByName(name);
+	   return repo.findByName(cropName);
 	}
 	
-	
-	public List<CropDetails> findByNameAndId(String name, int id){
+	public List<CropDetails> findByCropNameAndQunatity(String cropName, double qty){
 		
-		return repo.findByNameAndId(name, id);
+		   return repo.findByCropNameAndQunatity(cropName, qty-1);
+		}
+	
+	public List<CropDetails> findByCropNameAndPrice(String cropName, double price){
+		
+		   return repo.findByCropNameAndPrice(cropName, price+1);
+		}
+	
+	public List<CropDetails> findByCropNameAndPriceAndQunatity(String cropName, double price, double qty){
+		
+		   return repo.findByCropNameAndPriceAndQunatity(cropName, price+1, qty-1);
+		}
+	
+	
+	public Optional<CropDetails> findByNameAndId(String cropName, int fid){
+		
+		return repo.findByNameAndId(cropName, fid);
+	}
+	
+public Optional<CropDetails> findByIdAndFid(int cid, int fid){
+		
+		return repo.findByIdAndFid(cid, fid);
 	}
 	
 	
