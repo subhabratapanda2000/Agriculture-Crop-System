@@ -12,7 +12,7 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @NoArgsConstructor
 
-@Document(collection="FarmerDetails")
+@Document(collection="UsersDetails")
 public class FarmerDetails {
 	@Id
 	private int fid;

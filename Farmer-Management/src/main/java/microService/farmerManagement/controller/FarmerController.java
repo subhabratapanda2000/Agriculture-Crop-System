@@ -99,31 +99,40 @@ public class FarmerController {
 					return new ResponseEntity<String>("This user name Has been used already", HttpStatus.BAD_REQUEST);
 				}
 				else {
-				int id=(service.count())+10;
-				boolean flag=true;
-				while(flag) {
-					Optional<FarmerDetails> op = service.findById(id);
-					if(op.isPresent()) {
-						id++;
+					
+					//Check the phone number
+					String regex = "(0/91)?[7-9][0-9]{9}";
+					if(farmer.getMobileNo().matches(regex)) {
+						int id=(service.count())+10;
+						boolean flag=true;
+						while(flag) {
+							Optional<FarmerDetails> op = service.findById(id);
+							if(op.isPresent()) {
+								id++;
+							}
+							else {
+								flag=false;
+							}	
+						}
+	
+						DateTimeFormatter dtf = DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm:ss");  
+						LocalDateTime now = LocalDateTime.now(); 
+						String dt=dtf.format(now);  
+						String date=dt.substring(0, 10);
+						farmer.setJoinDate(date);
+						farmer.setRole("ROLE_FARMER");
+						farmer.setFid(id);
+						farmer.setActive(true);
+						farmer.setPrimeMember(false);
+						System.out.println(farmer);
+						service.save(farmer);
+						System.out.println("Save...");
+						System.out.println(farmer);
+						return new ResponseEntity<String>("farmer add successfully", HttpStatus.CREATED);
 					}
 					else {
-						flag=false;
-					}	
-				}
-				DateTimeFormatter dtf = DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm:ss");  
-				   LocalDateTime now = LocalDateTime.now(); 
-				   String dt=dtf.format(now);  
-				   String date=dt.substring(0, 10);
-				farmer.setJoinDate(date);
-				farmer.setRole("ROLE_FARMER");
-				farmer.setFid(id);
-				farmer.setActive(true);
-				farmer.setPrimeMember(false);
-				System.out.println(farmer);
-				service.save(farmer);
-			System.out.println("Save...");
-			System.out.println(farmer);
-			return new ResponseEntity<String>("farmer add successfully", HttpStatus.CREATED);
+						return new ResponseEntity<String>("Invalid Phone Number", HttpStatus.BAD_GATEWAY);
+					}
 				}
 			}catch(Exception e) {
 				//logger.trace(e.getMessage());
@@ -251,15 +260,22 @@ public class FarmerController {
 						return new ResponseEntity<Object>("This user name Has been used already", HttpStatus.BAD_REQUEST);
 					}
 					else {
-						FarmerDetails fr=op.get();
-						farmer.setActive(true);
-						farmer.setFid(fr.getFid());
-						farmer.setRole("ROLE_FARMER");
-						farmer.setPassword(fr.getPassword());
-						farmer.setJoinDate(fr.getJoinDate());
-						farmer.setPrimeMember(fr.isPrimeMember());
-						service.save(farmer);
-						return new ResponseEntity<Object>("The Data is update successfully of "+farmer.getName(), HttpStatus.OK);
+						String regex = "(0/91)?[6-9][0-9]{9}";
+						if(farmer.getMobileNo().matches(regex)) {
+							FarmerDetails fr=op.get();
+							farmer.setActive(true);
+							farmer.setFid(fr.getFid());
+							farmer.setRole("ROLE_FARMER");
+							farmer.setPassword(fr.getPassword());
+							farmer.setJoinDate(fr.getJoinDate());
+							farmer.setPrimeMember(fr.isPrimeMember());
+							service.save(farmer);
+							return new ResponseEntity<Object>("The Data is update successfully of "+farmer.getName(), HttpStatus.OK);
+						}
+						else
+						{
+							return new ResponseEntity<Object>("Invalid Phone Number", HttpStatus.BAD_GATEWAY);
+						}
 					}
 				}
 				else {

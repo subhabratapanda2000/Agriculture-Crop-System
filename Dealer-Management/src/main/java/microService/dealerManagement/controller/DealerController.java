@@ -93,29 +93,36 @@ public class DealerController {
 					return new ResponseEntity<String>("This UserName Has been used already", HttpStatus.BAD_REQUEST);
 				}
 				else {
-				int id=(service.count())+10;
-				boolean flag=true;
-				while(flag) {
-					Optional<DealerDetails> op = service.findById(id);
-					if(op.isPresent()) {
-						id++;
-					}
+					String regex = "(0/91)?[7-9][0-9]{9}";
+					if(dealer.getMobileNo().matches(regex)) {
+						int id=(service.count())+10;
+						boolean flag=true;
+						while(flag) {
+							Optional<DealerDetails> op = service.findById(id);
+							if(op.isPresent()) {
+								id++;
+							}
+							else {
+								flag=false;
+							}	
+						}
+						DateTimeFormatter dtf = DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm:ss");  
+						LocalDateTime now = LocalDateTime.now(); 
+						String dt=dtf.format(now);  
+						String date=dt.substring(0, 10);
+						dealer.setJoinDate(date);
+						dealer.setRole("ROLE_DEALER");
+						dealer.setFid(id);
+						dealer.setPrimeMember(false);
+						dealer.setActive(true);
+						service.save(dealer);
+						System.out.println("Save...");
+						System.out.println(dealer);
+						return new ResponseEntity<String>("Dealer add successfully", HttpStatus.CREATED);
+						}
 					else {
-						flag=false;
-					}	
-				}
-				DateTimeFormatter dtf = DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm:ss");  
-				   LocalDateTime now = LocalDateTime.now(); 
-				   String dt=dtf.format(now);  
-				   String date=dt.substring(0, 10);
-				dealer.setJoinDate(date);
-				dealer.setRole("ROLE_DEALER");
-				dealer.setFid(id);
-				dealer.setActive(true);
-				service.save(dealer);
-			System.out.println("Save...");
-			System.out.println(dealer);
-			return new ResponseEntity<String>("Dealer add successfully", HttpStatus.CREATED);
+							return new ResponseEntity<String>("Invalid Phone Number", HttpStatus.BAD_GATEWAY);
+						}
 				}
 			}catch(Exception e) {
 //				logger.trace(e.getMessage());
@@ -244,15 +251,22 @@ public class DealerController {
 						return new ResponseEntity<Object>("This user name Has been used already", HttpStatus.BAD_REQUEST);
 					}
 					else {
-						DealerDetails dr=op.get();
-						dealer.setActive(true);
-						dealer.setPassword(dr.getPassword());
-						dealer.setFid(dr.getFid());
-						dealer.setRole("ROLE_DEALER");
-						dealer.setJoinDate(dr.getJoinDate());
-						dealer.setPrimeMember(dr.isPrimeMember());
-						service.save(dealer);
-						return new ResponseEntity<Object>("The Data is update successfully of "+dealer.getName(), HttpStatus.OK);
+						String regex = "(0/91)?[6-9][0-9]{9}";
+						if(dealer.getMobileNo().matches(regex)) {
+							DealerDetails dr=op.get();
+							dealer.setActive(true);
+							dealer.setPassword(dr.getPassword());
+							dealer.setFid(dr.getFid());
+							dealer.setRole("ROLE_DEALER");
+							dealer.setJoinDate(dr.getJoinDate());
+							dealer.setPrimeMember(dr.isPrimeMember());
+							service.save(dealer);
+							return new ResponseEntity<Object>("The Data is update successfully of "+dealer.getName(), HttpStatus.OK);
+						}
+						else
+						{
+							return new ResponseEntity<Object>("Invalid Phone Number", HttpStatus.BAD_GATEWAY);
+						}
 						}
 				}
 				else {
