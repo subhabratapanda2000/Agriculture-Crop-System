@@ -1,11 +1,18 @@
 package microService.jwtManagement.controllers;
 
 import java.net.URI;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
+import java.util.TreeMap;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.BadCredentialsException;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -15,8 +22,11 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
 
+import microService.jwtManagement.models.AuthenticationRequest;
+import microService.jwtManagement.models.AuthenticationResponse;
 import microService.jwtManagement.models.CropDetails;
 import microService.jwtManagement.models.CropRequirements;
 import microService.jwtManagement.models.DealerDetails;
@@ -24,13 +34,17 @@ import microService.jwtManagement.models.FarmerContactDetails;
 import microService.jwtManagement.models.FarmerDetails;
 import microService.jwtManagement.models.FarmerDetailsWithCrops;
 import microService.jwtManagement.models.PasswordChange;
+import microService.jwtManagement.models.PaymentAck;
 import microService.jwtManagement.models.PaymentDetails;
 import microService.jwtManagement.models.SendOfferDetails;
+import microService.jwtManagement.models.UserData;
+import microService.jwtManagement.security.MyUserDetailsService;
 import microService.jwtManagement.services.CropsService;
 import microService.jwtManagement.services.DealerService;
 import microService.jwtManagement.services.FarmerService;
 import microService.jwtManagement.services.PaymentService;
 import microService.jwtManagement.services.UsersService;
+import microService.jwtManagement.util.JwtUtil;
 
 @RestController
 @CrossOrigin
@@ -55,6 +69,51 @@ public class SecurityController {
 	@Autowired
 	private PaymentService paymentService;
 	
+	@Autowired
+	private AuthenticationManager authenticationManager;
+
+	@Autowired
+	private JwtUtil jwtTokenUtil;
+
+	@Autowired
+	private MyUserDetailsService userDetailsService;
+
+	@RequestMapping({ "/hello" })
+	public String firstPage() {
+		return "Hello World";
+	}
+
+	@RequestMapping(value = "/authenticate", method = RequestMethod.POST)
+	public ResponseEntity<?> createAuthenticationToken(@RequestBody AuthenticationRequest authenticationRequest) throws Exception {
+
+		try {
+			authenticationManager.authenticate(
+					new UsernamePasswordAuthenticationToken(authenticationRequest.getUsername(), authenticationRequest.getPassword())
+			);
+		}
+		catch (BadCredentialsException e) {
+			throw new Exception("Incorrect username or password", e);
+		}
+
+
+		final UserDetails userDetails = userDetailsService
+				.loadUserByUsername(authenticationRequest.getUsername());
+
+		final String jwt = jwtTokenUtil.generateToken(userDetails);
+		int id=0;
+		String role="";
+		String name="";
+		Optional<UserData> op=userService.findByUserNameOfUser(authenticationRequest.getUsername());
+		if(op.isPresent()) {
+			id=op.get().getFid();
+			role=op.get().getRole();
+			name=op.get().getName();
+		}
+		System.out.println(id+" "+op.get());
+
+		return ResponseEntity.ok(new AuthenticationResponse(jwt, id, role, name));
+	}
+
 	
 	//Crops Management
 	@PostMapping("/farmer/addCrop/{fid}")
@@ -63,135 +122,118 @@ public class SecurityController {
 		String s=cropService.addCrops(crop, fid);
 		return new ResponseEntity<String>(s, HttpStatus.CREATED);
 		}catch(Exception e) {
-			return new ResponseEntity<String>("There have some problem: "+e, HttpStatus.INTERNAL_SERVER_ERROR);
+			return new ResponseEntity<String>(e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
 		}
 	}
 
 	 @GetMapping("/anyRole/findCropById/{cid}")
-	public ResponseEntity<Object> findCropById(@PathVariable("cid") int cid ) {
-		try {	
+	public ResponseEntity<CropDetails> findCropById(@PathVariable("cid") int cid ) throws Exception {
+		
 			CropDetails crop=cropService.findCropById(cid);
-			return new ResponseEntity<Object>(crop, HttpStatus.OK);
-		}catch(Exception e) {
-			return new ResponseEntity<Object>("There have some problem: "+e, HttpStatus.INTERNAL_SERVER_ERROR);
-		}
+			return new ResponseEntity<CropDetails>(crop, HttpStatus.OK);
+		
 	 }
 	 
 	 @GetMapping("/anyRole/findAllCrops")
-	public ResponseEntity<Object> findAllCrops(){
-		try {
-			List<CropDetails> list=cropService.findAllCrops();
-			if(!list.isEmpty()) {
-				return new ResponseEntity<Object>(list, HttpStatus.OK);
-			}
-			else {
-				return new ResponseEntity<Object>("There is no Crops", HttpStatus.NO_CONTENT);
-			}
-		}catch(Exception e) {
-			return new ResponseEntity<Object>("There have some problem: "+e, HttpStatus.INTERNAL_SERVER_ERROR);
-		}	
+	public ResponseEntity<List<CropDetails>> findAllCrops(){
+		
+		 List<CropDetails> list=new ArrayList<>();
+			try{
+				list=cropService.findAllCrops();
 			
+				return new ResponseEntity<List<CropDetails>>(list, HttpStatus.OK);
+			}
+		
+			catch(Exception e) {
+				return new ResponseEntity<List<CropDetails>>(list, HttpStatus.INTERNAL_SERVER_ERROR);
+			}		
 	}
 	 
 	 @PutMapping("/farmer/updateCrop/{cid}/{fid}")
-	public ResponseEntity<Object> deleteCrop(@PathVariable("cid") int cid, @PathVariable("fid") int fid, @RequestBody CropDetails crop ) {
+	public ResponseEntity<String> deleteCrop(@PathVariable("cid") int cid, @PathVariable("fid") int fid, @RequestBody CropDetails crop ) {
 		try {	
 			String s=cropService.updateCropByIdAndFid(crop, cid, fid);
-			return new ResponseEntity<Object>(s, HttpStatus.OK);
+			return new ResponseEntity<String>(s, HttpStatus.OK);
 		}catch(Exception e) {
-			return new ResponseEntity<Object>("There have some problem: "+e, HttpStatus.INTERNAL_SERVER_ERROR);
+			return new ResponseEntity<String>(e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
 		}
 	 }
 	 
 	 @DeleteMapping("/farmer/deleteCrop/{cid}/{fid}")
-		public ResponseEntity<Object> deleteCrop(@PathVariable("cid") int cid, @PathVariable("fid") int fid) {
+		public ResponseEntity<String> deleteCrop(@PathVariable("cid") int cid, @PathVariable("fid") int fid) {
 			try {	
 				String s=cropService.deleteCropByIdAndFid(cid, fid);
-				return new ResponseEntity<Object>(s, HttpStatus.OK);
+				return new ResponseEntity<String>(s, HttpStatus.OK);
 			}catch(Exception e) {
-				return new ResponseEntity<Object>("There have some problem "+e, HttpStatus.INTERNAL_SERVER_ERROR);
+				return new ResponseEntity<String>(e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
 			}
 		 }
 
 	 @GetMapping("/anyRole/findAllCropsByFid/{fid}")
-	public ResponseEntity<Object> findAllCropsByFid(@PathVariable("fid") int fid){
-		try {
-			List<CropDetails> list=cropService.findCropsByFarmerId(fid);
-			if(!list.isEmpty()) {
-				return new ResponseEntity<Object>(list, HttpStatus.OK);
-			}
-			else {
-				return new ResponseEntity<Object>("There is no Crops", HttpStatus.NO_CONTENT);
-			}
+	public ResponseEntity<List<CropDetails>> findAllCropsByFid(@PathVariable("fid") int fid){
+		 List<CropDetails> list=new ArrayList<>();
+		 try {
+			list=cropService.findCropsByFarmerId(fid);
+				return new ResponseEntity<List<CropDetails>>(list, HttpStatus.OK);
+			
 		}catch(Exception e) {
-			return new ResponseEntity<Object>("There have some problem "+e, HttpStatus.INTERNAL_SERVER_ERROR);
+			return new ResponseEntity<List<CropDetails>>(list, HttpStatus.INTERNAL_SERVER_ERROR);
 		}	
 			
 	}
 	 
 	 @GetMapping("/anyRole/findCropsByCropName/{name}")
-		public ResponseEntity<Object> findCropsByCropName(@PathVariable("name") String name){
-			try {
-				List<CropDetails> list=cropService.findByCropName(name);
-				if(!list.isEmpty()) {
-					return new ResponseEntity<Object>(list, HttpStatus.OK);
-				}
-				else {
-					return new ResponseEntity<Object>("There is no Crops", HttpStatus.NO_CONTENT);
-				}
+		public ResponseEntity<List<CropDetails>> findCropsByCropName(@PathVariable("name") String name){
+		 List<CropDetails> list=new ArrayList<>();
+		 try {
+				list=cropService.findByCropName(name);
+				
+					return new ResponseEntity<List<CropDetails>>(list, HttpStatus.OK);
+				
 			}catch(Exception e) {
-				return new ResponseEntity<Object>("There have some problem: "+e, HttpStatus.INTERNAL_SERVER_ERROR);
+				return new ResponseEntity<List<CropDetails>>(list, HttpStatus.INTERNAL_SERVER_ERROR);
 			}	
 				
 		}
 
 	 @GetMapping("/anyRole/findCropsByCropNameAndQuantity/{name}/{qty}")
-		public ResponseEntity<Object> findCropsByCropNameAndQuantity(@PathVariable("name") String name, @PathVariable("qty") double qty){
-			try {
-				List<CropDetails> list=cropService.findByCropNameAndQuantity(name, qty);
-						
-				if(!list.isEmpty()) {
-					return new ResponseEntity<Object>(list, HttpStatus.OK);
-				}
-				else {
-					return new ResponseEntity<Object>("There is no Crops", HttpStatus.NO_CONTENT);
-				}
+		public ResponseEntity<List<CropDetails>> findCropsByCropNameAndQuantity(@PathVariable("name") String name, @PathVariable("qty") double qty){
+		 List<CropDetails> list=new ArrayList<>();	
+		 try {
+			list=cropService.findByCropNameAndQuantity(name, qty);
+				
+					return new ResponseEntity<List<CropDetails>>(list, HttpStatus.OK);
+				
 			}catch(Exception e) {
-				return new ResponseEntity<Object>("There have some problem: "+e, HttpStatus.INTERNAL_SERVER_ERROR);
+				return new ResponseEntity<List<CropDetails>>(list, HttpStatus.INTERNAL_SERVER_ERROR);
 			}	
 				
 		}
 	 
 	 @GetMapping("/anyRole/findCropsByCropNameAndPrice/{name}/{price}")
-		public ResponseEntity<Object> findCropsByCropNameAndPrice(@PathVariable("name") String name, @PathVariable("price") double price){
-			try {
-				List<CropDetails> list=cropService.findByCropNameAndPrice(name, price);
-						
-				if(!list.isEmpty()) {
-					return new ResponseEntity<Object>(list, HttpStatus.OK);
-				}
-				else {
-					return new ResponseEntity<Object>("There is no Crops", HttpStatus.NO_CONTENT);
-				}
+		public ResponseEntity<List<CropDetails>> findCropsByCropNameAndPrice(@PathVariable("name") String name, @PathVariable("price") double price){
+		 List<CropDetails> list=new ArrayList<>();	
+		 try {
+				list=cropService.findByCropNameAndPrice(name, price);
+				
+					return new ResponseEntity<List<CropDetails>>(list, HttpStatus.OK);
+				
 			}catch(Exception e) {
-				return new ResponseEntity<Object>("There have some problem: "+e, HttpStatus.INTERNAL_SERVER_ERROR);
+				return new ResponseEntity<List<CropDetails>>(list, HttpStatus.INTERNAL_SERVER_ERROR);
 			}	
 				
 		}
 	 
 	 @GetMapping("/anyRole/findCropsByCropNameAndPriceAndQuantity/{name}/{price}/{qty}")
-		public ResponseEntity<Object> findCropsByCropNameAndPriceAndQuantity(@PathVariable("name") String name, @PathVariable("price") double price, @PathVariable("qty") double qty){
-			try {
-				List<CropDetails> list=cropService.findByCropNameAndPriceAndQuantity(name, price, qty);
-						
-				if(!list.isEmpty()) {
-					return new ResponseEntity<Object>(list, HttpStatus.OK);
-				}
-				else {
-					return new ResponseEntity<Object>("There is no Crops", HttpStatus.NO_CONTENT);
-				}
+		public ResponseEntity<List<CropDetails>> findCropsByCropNameAndPriceAndQuantity(@PathVariable("name") String name, @PathVariable("price") double price, @PathVariable("qty") double qty){
+		 List<CropDetails> list=new ArrayList<>();
+		 try {
+			list=cropService.findByCropNameAndPriceAndQuantity(name, price, qty);
+	
+					return new ResponseEntity<List<CropDetails>>(list, HttpStatus.OK);
+				
 			}catch(Exception e) {
-				return new ResponseEntity<Object>("There have some problem: "+e, HttpStatus.INTERNAL_SERVER_ERROR);
+				return new ResponseEntity<List<CropDetails>>(list, HttpStatus.INTERNAL_SERVER_ERROR);
 			}	
 				
 		}
@@ -199,45 +241,39 @@ public class SecurityController {
 	 //Farmer Management
 	 
 	@GetMapping("/admin/findAllFarmers")
-	public ResponseEntity<Object> getAllFarmers(){
+	public ResponseEntity<List<FarmerDetails>> getAllFarmers(){
+		List<FarmerDetails> list=new ArrayList<>();
 		try {
-		List<FarmerDetails> list=farmerService.findAllFarmers();
-		if(!list.isEmpty()) {
-			return new ResponseEntity<Object>(list, HttpStatus.OK);
-		}
-		else {
-			return new ResponseEntity<Object>("There is no Farmers", HttpStatus.NO_CONTENT);
-		}
+		list=farmerService.findAllFarmers();
+			return new ResponseEntity<List<FarmerDetails>>(list, HttpStatus.OK);
 		}catch(Exception e) {
-			return new ResponseEntity<Object>("There have some problem: "+e, HttpStatus.INTERNAL_SERVER_ERROR);
+			return new ResponseEntity<List<FarmerDetails>>(list, HttpStatus.INTERNAL_SERVER_ERROR);
 		}	
 		
 	}
 	
 	
 	@GetMapping("/farmer/getOffers")
-	public ResponseEntity<Object> getOffers(){
+	public ResponseEntity<List<SendOfferDetails>> getOffers(){
+		List<SendOfferDetails> list=new ArrayList<>();
 		try {
-		List<SendOfferDetails> list=farmerService.getOffers();
-		if(!list.isEmpty()) {
-			return new ResponseEntity<Object>(list, HttpStatus.OK);
-		}
-		else {
-			return new ResponseEntity<Object>("There is no Offers", HttpStatus.NO_CONTENT);
-		}
+		list=farmerService.getOffers();
+			return new ResponseEntity<List<SendOfferDetails>>(list, HttpStatus.OK);
+		
 		}catch(Exception e) {
-			return new ResponseEntity<Object>("There have some problem: "+e, HttpStatus.INTERNAL_SERVER_ERROR);
+			return new ResponseEntity<List<SendOfferDetails>>(list, HttpStatus.INTERNAL_SERVER_ERROR);
 		}	
 		
 	}
 	
 	@GetMapping("/anyRole/findFarmerDetailsWithCrops/{fid}")
-	public ResponseEntity<Object> findFarmerDetailsWithCrops(@PathVariable("fid") int fid ) {
+	public ResponseEntity<FarmerDetailsWithCrops> findFarmerDetailsWithCrops(@PathVariable("fid") int fid ) {
+		FarmerDetailsWithCrops farmer=new FarmerDetailsWithCrops();
 		try {	
-			FarmerDetailsWithCrops farmer=farmerService.getFarmerDetailsWithCrops(fid);
-		return new ResponseEntity<Object>(farmer, HttpStatus.OK);
+		farmer=farmerService.getFarmerDetailsWithCrops(fid);
+		return new ResponseEntity<FarmerDetailsWithCrops>(farmer, HttpStatus.OK);
 		}catch(Exception e) {
-			return new ResponseEntity<Object>("There have some problem: "+e, HttpStatus.INTERNAL_SERVER_ERROR);
+			return new ResponseEntity<FarmerDetailsWithCrops>(farmer, HttpStatus.INTERNAL_SERVER_ERROR);
 		}
 	}
 	
@@ -250,38 +286,31 @@ public class SecurityController {
 			String s=farmerService.createFarmers(farmer);
 			return new ResponseEntity<String>(s, HttpStatus.CREATED);
 			}catch(Exception e) {
-				return new ResponseEntity<String>("There have some problem: "+e, HttpStatus.INTERNAL_SERVER_ERROR);
+				return new ResponseEntity<String>(e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
 			}
 		}
 	 
 	 @GetMapping("/admin/findAllPrimeFarmers")
 		public ResponseEntity<Object> findAllPrimeFarmers(){
+			List<FarmerDetails> list=new ArrayList<>();
 			try {
-			List<FarmerDetails> list=farmerService.findAllPrimeFarmers();
-			if(!list.isEmpty()) {
+			list=farmerService.findAllPrimeFarmers();
 				return new ResponseEntity<Object>(list, HttpStatus.OK);
-			}
-			else {
-				return new ResponseEntity<Object>("There is no Prime Farmers", HttpStatus.NO_CONTENT);
-			}
 			}catch(Exception e) {
-				return new ResponseEntity<Object>("There have some problem: "+e, HttpStatus.INTERNAL_SERVER_ERROR);
+				return new ResponseEntity<Object>(list, HttpStatus.INTERNAL_SERVER_ERROR);
 			}	
 			
 		}
 	 
 	 @GetMapping("/admin/findAllActiveFarmers")
 		public ResponseEntity<Object> findAllActiveFarmers(){
+			List<FarmerDetails> list=new ArrayList<>();
 			try {
-			List<FarmerDetails> list=farmerService.findAllActiveFarmers();
-			if(!list.isEmpty()) {
+			list=farmerService.findAllActiveFarmers();
 				return new ResponseEntity<Object>(list, HttpStatus.OK);
-			}
-			else {
-				return new ResponseEntity<Object>("There is no Active Farmers", HttpStatus.NO_CONTENT);
-			}
+		
 			}catch(Exception e) {
-				return new ResponseEntity<Object>("There have some problem: "+e, HttpStatus.INTERNAL_SERVER_ERROR);
+				return new ResponseEntity<Object>(list, HttpStatus.INTERNAL_SERVER_ERROR);
 			}	
 			
 		}
@@ -293,27 +322,28 @@ public class SecurityController {
 			String s=farmerService.updateFarmers(farmer, fid);
 			return new ResponseEntity<String>(s, HttpStatus.CREATED);
 			}catch(Exception e) {
-				return new ResponseEntity<String>("There have some problem: "+e, HttpStatus.INTERNAL_SERVER_ERROR);
+				return new ResponseEntity<String>(e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
 			}
 		}
 	 
 	 @GetMapping("/findByIdOfFarmer/{fid}")
 		public ResponseEntity<Object> findByIdOfFarmer(@PathVariable("fid") int fid ) {
-			try {	
-			FarmerDetails farmer=farmerService.findByIdOfFarmers(fid);
+		 FarmerDetails farmer=new FarmerDetails();
+		 try {	
+			farmer=farmerService.findByIdOfFarmers(fid);
 			return new ResponseEntity<Object>(farmer, HttpStatus.OK);
 			}catch(Exception e) {
-				return new ResponseEntity<Object>("There have some problem: "+e, HttpStatus.INTERNAL_SERVER_ERROR);
+				return new ResponseEntity<Object>(farmer, HttpStatus.INTERNAL_SERVER_ERROR);
 			}
 		}
 	 
-	 @PutMapping("/farmer/deactivateFarmer/{fid}")
+	 @GetMapping("/farmer/deactivateFarmer/{fid}")
 		public ResponseEntity<String> deactivateFarmer(@PathVariable("fid") int fid ) {
 			try {	
 			String s=farmerService.deactivateFarmerById(fid);
 			return new ResponseEntity<String>(s, HttpStatus.OK);
 			}catch(Exception e) {
-				return new ResponseEntity<String>("There have some problem: "+e, HttpStatus.INTERNAL_SERVER_ERROR);
+				return new ResponseEntity<String>(e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
 			}
 		}
 	 
@@ -322,21 +352,21 @@ public class SecurityController {
 			try {
 				FarmerDetails fr=farmerService.findByIdOfFarmers(fid);
 					if(fr.getRole().equals("ROLE_FARMER") && fr.isActive()) {
-						if(pass.getMobileNo().equals(fr.getMobileNo()) && getPasswordEncoder.matches(pass.getOldPassword(), fr.getPassword()))
+						if(getPasswordEncoder.matches(pass.getOldPassword(), fr.getPassword()))
 						{
 							pass.setNewPassword(getPasswordEncoder.encode(pass.getNewPassword()));
 						   String s=farmerService.changePasswordOfFarmer(fid, pass);
 							return new ResponseEntity<Object>(s, HttpStatus.OK);						
 						}
 						else {
-							return new ResponseEntity<Object>("Give Correct Mobile Number and Old Password", HttpStatus.BAD_REQUEST);	
+							return new ResponseEntity<Object>("Give Correct Old Password", HttpStatus.BAD_REQUEST);	
 						}
 					   }
 					 else {
 					   return new ResponseEntity<Object>(fid+ " not exist", HttpStatus.NOT_FOUND);
 					 }
 			}catch(Exception e) {
-				return new ResponseEntity<Object>("There have some problem: "+e, HttpStatus.INTERNAL_SERVER_ERROR);
+				return new ResponseEntity<Object>(e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
 			}
 		}
 	 
@@ -346,17 +376,18 @@ public class SecurityController {
 			//String s=farmerService.payForPrime(fid);
 			return ResponseEntity.status(HttpStatus.FOUND).location(URI.create("http://localhost:8052/farmer/payForPrime/"+fid)).build();
 			}catch(Exception e) {
-				return new ResponseEntity<Object>("There have some problem: "+e, HttpStatus.INTERNAL_SERVER_ERROR);
+				return new ResponseEntity<Object>(e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
 			}
 		}
 	 
 	 @GetMapping("/anyRole/findFarmerContactDetails/{fid}")
 		public ResponseEntity<Object> findFarmerContactDetails(@PathVariable("fid") int fid ) {
-			try {	
-				FarmerContactDetails farmer=farmerService.findFarmerContact(fid);
+		 FarmerContactDetails farmer=new FarmerContactDetails ();	
+		 try {	
+			farmer=farmerService.findFarmerContact(fid);
 			return new ResponseEntity<Object>(farmer, HttpStatus.OK);
 			}catch(Exception e) {
-				return new ResponseEntity<Object>("There have some problem: "+e, HttpStatus.INTERNAL_SERVER_ERROR);
+				return new ResponseEntity<Object>(farmer, HttpStatus.INTERNAL_SERVER_ERROR);
 			}
 		}
 
@@ -365,16 +396,12 @@ public class SecurityController {
 	 
 	 @GetMapping("/admin/findAllDealers")
 		public ResponseEntity<Object> getAllDealers(){
-			try {
-			List<DealerDetails> list=dealerService.findAllDealers();
-			if(!list.isEmpty()) {
+		 List<DealerDetails> list=new ArrayList<>();	
+		 try {
+			list=dealerService.findAllDealers();
 				return new ResponseEntity<Object>(list, HttpStatus.OK);
-			}
-			else {
-				return new ResponseEntity<Object>("There is no Dealers", HttpStatus.NO_CONTENT);
-			}
 			}catch(Exception e) {
-				return new ResponseEntity<Object>("There have some problem: "+e, HttpStatus.INTERNAL_SERVER_ERROR);
+				return new ResponseEntity<Object>(list, HttpStatus.INTERNAL_SERVER_ERROR);
 			}	
 			
 		}
@@ -385,7 +412,7 @@ public class SecurityController {
 			String s=dealerService.sendOffer(req, did);
 			return new ResponseEntity<Object>(s, HttpStatus.OK);
 			}catch(Exception e) {
-				return new ResponseEntity<Object>("There have some problem: "+e, HttpStatus.INTERNAL_SERVER_ERROR);
+				return new ResponseEntity<Object>(e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
 			}
 		}
 	 
@@ -398,7 +425,7 @@ public class SecurityController {
 				String s=dealerService.createDealers(dealer);
 				return new ResponseEntity<String>(s, HttpStatus.CREATED);
 				}catch(Exception e) {
-					return new ResponseEntity<String>("There have some problem: "+e, HttpStatus.INTERNAL_SERVER_ERROR);
+					return new ResponseEntity<String>(e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
 				}
 			}
 		 
@@ -409,60 +436,53 @@ public class SecurityController {
 				String s=dealerService.updateDealers(dealer, did);
 				return new ResponseEntity<String>(s, HttpStatus.CREATED);
 				}catch(Exception e) {
-					return new ResponseEntity<String>("There have some problem: "+e, HttpStatus.INTERNAL_SERVER_ERROR);
+					return new ResponseEntity<String>(e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
 				}
 			}
 		 
 		 @GetMapping("/findByIdOfDealer/{did}")
 			public ResponseEntity<Object> findByIdOfDealer(@PathVariable("did") int did ) {
-				try {	
-				DealerDetails dealer=dealerService.findByIdOfDealers(did);
+			 DealerDetails dealer=new DealerDetails();
+			 try {	
+				dealer=dealerService.findByIdOfDealers(did);
 				return new ResponseEntity<Object>(dealer, HttpStatus.OK);
 				}catch(Exception e) {
-					return new ResponseEntity<Object>("There have some problem: "+e, HttpStatus.INTERNAL_SERVER_ERROR);
+					return new ResponseEntity<Object>(dealer, HttpStatus.INTERNAL_SERVER_ERROR);
 				}
 			}
 		 
 		 @GetMapping("/admin/findAllPrimeDealers")
 			public ResponseEntity<Object> findAllPrimeDealers(){
-				try {
-				List<DealerDetails> list=dealerService.findAllPrimeDealers();
-				if(!list.isEmpty()) {
+			 List<DealerDetails> list=new ArrayList<>();	
+			 try {
+				list=dealerService.findAllPrimeDealers();
 					return new ResponseEntity<Object>(list, HttpStatus.OK);
-				}
-				else {
-					return new ResponseEntity<Object>("There is no Prime Dealers", HttpStatus.NO_CONTENT);
-				}
 				}catch(Exception e) {
-					return new ResponseEntity<Object>("There have some problem: "+e, HttpStatus.INTERNAL_SERVER_ERROR);
+					return new ResponseEntity<Object>(list, HttpStatus.INTERNAL_SERVER_ERROR);
 				}	
 				
 			}
 		 
 		 @GetMapping("/admin/findAllActiveDealers")
 			public ResponseEntity<Object> findAllActiveDealers(){
-				try {
-				List<DealerDetails> list=dealerService.findAllActiveDealers();
-				if(!list.isEmpty()) {
+			 List<DealerDetails> list=new ArrayList<>();	
+			 try {
+				list=dealerService.findAllActiveDealers();
 					return new ResponseEntity<Object>(list, HttpStatus.OK);
-				}
-				else {
-					return new ResponseEntity<Object>("There is no Active Dealers", HttpStatus.NO_CONTENT);
-				}
 				}catch(Exception e) {
-					return new ResponseEntity<Object>("There have some problem: "+e, HttpStatus.INTERNAL_SERVER_ERROR);
+					return new ResponseEntity<Object>(list, HttpStatus.INTERNAL_SERVER_ERROR);
 				}	
 				
 			}
 		 
 		 
-		 @PutMapping("/dealer/deactivateDealer/{did}")
+		 @GetMapping("/dealer/deactivateDealer/{did}")
 			public ResponseEntity<String> deactivateDealer(@PathVariable("did") int did ) {
 				try {	
 				String s=dealerService.deactivateByIdOfDealers(did);
 				return new ResponseEntity<String>(s, HttpStatus.OK);
 				}catch(Exception e) {
-					return new ResponseEntity<String>("There have some problem: "+e, HttpStatus.INTERNAL_SERVER_ERROR);
+					return new ResponseEntity<String>(e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
 				}
 			}
 		 
@@ -471,21 +491,21 @@ public class SecurityController {
 				try {	
 					DealerDetails dr=dealerService.findByIdOfDealers(did);
 					if(dr.getRole().equals("ROLE_DEALER") && dr.isActive()) {
-						if(pass.getMobileNo().equals(dr.getMobileNo()) && getPasswordEncoder.matches(pass.getOldPassword(), dr.getPassword()))
+						if(getPasswordEncoder.matches(pass.getOldPassword(), dr.getPassword()))
 						{
 							pass.setNewPassword(getPasswordEncoder.encode(pass.getNewPassword()));
 						   String s=dealerService.changePasswordOfDealer(did, pass);
 							return new ResponseEntity<Object>(s, HttpStatus.OK);						
 						}
 						else {
-							return new ResponseEntity<Object>("Give Correct Mobile Number and Old Password", HttpStatus.BAD_REQUEST);	
+							return new ResponseEntity<Object>("Give Correct Old Password", HttpStatus.BAD_REQUEST);	
 						}
 					   }
 					 else {
 					   return new ResponseEntity<Object>(did+ " not exist", HttpStatus.NOT_FOUND);
 					 }
 				}catch(Exception e) {
-					return new ResponseEntity<Object>("There have some problem: "+e, HttpStatus.INTERNAL_SERVER_ERROR);
+					return new ResponseEntity<Object>(e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
 				}
 			}
 
@@ -495,7 +515,7 @@ public class SecurityController {
 				String s=dealerService.payForPrime(did);
 				return ResponseEntity.status(HttpStatus.FOUND).location(URI.create("http://localhost:8053/dealer/payForPrime/"+did)).build();
 				}catch(Exception e) {
-					return new ResponseEntity<Object>("There have some problem: "+e, HttpStatus.INTERNAL_SERVER_ERROR);
+					return new ResponseEntity<Object>(e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
 				}
 			}
 			
@@ -504,30 +524,42 @@ public class SecurityController {
 		 
 		 @GetMapping("/admin/findAllPayments")
 			public ResponseEntity<Object> getAllPayments(){
-				try {
-				List<PaymentDetails> list=paymentService.findAllPayments();
-				if(!list.isEmpty()) {
+			 List<PaymentDetails> list=new ArrayList<>();	
+			 try {
+				list=paymentService.findAllPayments();
 					return new ResponseEntity<Object>(list, HttpStatus.OK);
-				}
-				else {
-					return new ResponseEntity<Object>("There is no Payments", HttpStatus.NO_CONTENT);
-				}
 				}catch(Exception e) {
-					return new ResponseEntity<Object>("There have some problem: "+e, HttpStatus.INTERNAL_SERVER_ERROR);
+					return new ResponseEntity<Object>(list, HttpStatus.INTERNAL_SERVER_ERROR);
 				}	
 				
 			}
 		 
-		 @GetMapping("/admin/findPaymentsByCustomerId/{cid}")
+		 @GetMapping("/anyRole/findPaymentsByCustomerId/{cid}")
 			public ResponseEntity<Object> getAllPaymentsByCustomerId(@PathVariable("cid") int cid ){
-				try {
-				PaymentDetails payment=paymentService.findPaymentByCustomerId(cid);
+			 PaymentDetails payment=new PaymentDetails();	
+			 try {
+				payment=paymentService.findPaymentByCustomerId(cid);
 					return new ResponseEntity<Object>(payment, HttpStatus.OK);
 				}catch(Exception e) {
-					return new ResponseEntity<Object>("There have some problem: "+e, HttpStatus.INTERNAL_SERVER_ERROR);
+					return new ResponseEntity<Object>(payment, HttpStatus.INTERNAL_SERVER_ERROR);
 				}	
 				
 			}
+		 
+		 @GetMapping("/anyRole/findLastPaymentsByCustomerId/{cid}")
+			public ResponseEntity<Object> getLastPaymentsByCustomerId(@PathVariable("cid") int cid ){
+				try {
+				PaymentDetails payment=paymentService.findPaymentByCustomerId(cid);
+				List<TreeMap<String, String>> txn=payment.getTransactionDeatils();
+				PaymentAck ack=new PaymentAck(payment.getOrderId(), payment.getCustomerId(), payment.getResult(), txn.get(txn.size()-1));
+					return new ResponseEntity<Object>(ack, HttpStatus.OK);
+				}catch(Exception e) {
+					return new ResponseEntity<Object>(null, HttpStatus.INTERNAL_SERVER_ERROR);
+				}	
+				
+			}
+		 
+		 
 		 
 		 
 

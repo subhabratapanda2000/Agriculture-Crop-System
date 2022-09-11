@@ -13,7 +13,7 @@ import lombok.NoArgsConstructor;
 
 public class UserData {
 	
-	private int id;
+	private int fid;
 
 	private String name;
 	

@@ -6,6 +6,7 @@ import java.util.Collection;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.stereotype.Service;
 
 import microService.jwtManagement.models.UserData;
 
@@ -16,12 +17,14 @@ public class MyUserDetails implements UserDetails {
 	    private String password;
 	    private boolean active;
 	    private String authorities;
+	    private int id;
 
 	    public MyUserDetails(UserData farmer) {
 	        this.userName = farmer.getUserName();
 	        this.password = farmer.getPassword();
 	        this.active = farmer.isActive();
 	        this.authorities = farmer.getRole();
+	        this.id=farmer.getFid();
 	        
 	    }
 
@@ -34,6 +37,11 @@ public class MyUserDetails implements UserDetails {
     public String getPassword() {
         return  password;
     }
+    
+    
+    public int getId() {
+    	return id;
+    }
 
     @Override
     public String getUsername() {
@@ -42,21 +50,21 @@ public class MyUserDetails implements UserDetails {
 
     @Override
     public boolean isAccountNonExpired() {
-        return true;
+        return active;
     }
 
     @Override
     public boolean isAccountNonLocked() {
-        return true;
+        return active;
     }
 
     @Override
     public boolean isCredentialsNonExpired() {
-        return true;
+        return active;
     }
 
     @Override
     public boolean isEnabled() {
-        return true;
+        return active;
     }
 }

@@ -7,10 +7,10 @@ import lombok.NoArgsConstructor;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-public class PasswordChange {
-
-	private String oldPassword;
-	private String newPassword;
-	
+public class JwtResponse {
+	private int  id;
+	private String accessToken;
+	private String username;
+	private String password;
 
 }
