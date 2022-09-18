@@ -1,0 +1,38 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`matches snapshot 1`] = `
+<div
+  style={
+    Object {
+      "backgroundBlendMode": "lighten",
+      "backgroundImage": "url(about_us_crop.png)",
+      "backgroundRepeat": "no-repeat",
+      "backgroundSize": "cover",
+      "height": "700px",
+      "width": "100%",
+    }
+  }
+>
+  <p
+    className="display-1 text-center pb-1"
+    style={
+      Object {
+        "backgroundColor": "rgba(216, 227, 225, 0.5)",
+        "border": "2px solid ",
+        "borderRadius": "25px",
+        "fontSize": "24px",
+        "height": "220px",
+        "paddingLeft": "40px",
+        "paddingRight": "40px",
+        "paddingTop": "40px",
+      }
+    }
+  >
+    This 
+    <b>
+      Agriculture Crop System
+    </b>
+     act as a bridge between the Farmer and the Dealer (Crop purchaser). There is no need for the farmer to carry the crop till the market, paying unexpected commissions and wait for proper price from the Dealers. Whenever farmer want to sell the vegetables/fruits at the Farm itself, he just wants to select the type of Crop, quantity available, input the location/address and publish the information to Dealers. Whoever(Dealer) is interested in purchasing will connect with the Farmer, will reach the location, checks the quality of the crop, negotiates the price and buy the crop.
+  </p>
+</div>
+`;

@@ -1,0 +1,70 @@
+html,
+body {
+  background: #ccc;
+}
+
+#Header .a:hover {
+  color: #fff;
+}
+
+#bg-img {
+  background-image: url("../images/back1.jpg");
+  background-size: 100%;
+  background-repeat: no-repeat;
+  min-height: 500px;
+}
+
+#About {
+  margin-top: -250px;
+}
+
+#About .fa {
+  color: #ccc;
+}
+
+#About span {
+  padding: 10px 20px 10px 20px;
+}
+
+#About hr {
+  border-width: 2px;
+  margin-top: 6px;
+}
+
+#Skills span {
+  padding: 10px 20px 10px 20px;
+}
+
+#Skills hr {
+  border-width: 2px;
+  margin-top: 6px;
+}
+
+#Experience span {
+  padding: 10px 20px 10px 20px;
+}
+#Experience hr {
+  border-width: 2px;
+  margin-top: 6px;
+}
+#Experience .card {
+  border-top: 3px solid red;
+}
+#Contact span {
+  padding: 10px 20px 10px 20px;
+}
+#Contact hr {
+  border-width: 2px;
+  margin-top: 6px;
+}
+#profile {
+  border: 4px solid red;
+}
+#exlogo1 {
+  font-size: medium;
+  font-family: fangsong;
+}
+#exlogo2 {
+  font-size: medium;
+  font-family: fangsong;
+}
