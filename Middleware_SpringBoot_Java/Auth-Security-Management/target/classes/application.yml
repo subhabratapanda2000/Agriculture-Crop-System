@@ -1,0 +1,19 @@
+server:
+  port: 8057
+  
+spring:
+  application:
+    name: Auth-Security-Management
+    
+security:
+  oauth2:
+    client:
+      client-id: 467177055068535
+      client-secret: 7b6fbdf4f2cc56ad652e174c1da8e78d
+      access-token-uri: https://graph.facebook.com/oauth/access_token
+      user-authorization-uri: https://www.facebook.com/dialog/oauth
+      token-name: oauth_token
+      authentication-scheme: query
+      client-authentication-scheme: form
+    resource:
+      user-info-uri: https://graph.facebook.com/me
